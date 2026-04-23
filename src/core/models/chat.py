@@ -1,16 +1,17 @@
+from typing import Optional, List
 from pydantic import BaseModel
-from typing import List, Optional
 
 
 class ChatMessage(BaseModel):
-    role: str  # "user" или "assistant"
+    role: str
     content: str
 
 
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[ChatMessage]] = []
-    use_web_search: bool = False
+    use_web_search: Optional[bool] = None   # теперь Optional
+    use_vector_db: Optional[bool] = None    # теперь Optional
 
 
 class SourceInfo(BaseModel):

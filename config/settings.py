@@ -1,4 +1,3 @@
-# config/settings.py
 import os
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
@@ -36,6 +35,18 @@ class Settings(BaseSettings):
     RAW_DATA_PATH: str = os.getenv("RAW_DATA_PATH", "data/raw")
     PROCESSED_DATA_PATH: str = os.getenv(
         "PROCESSED_DATA_PATH", "data/processed")
+
+    RERANKER_MODEL_NAME: str = os.getenv(
+        "RERANKER_MODEL_NAME", "DiTy/cross-encoder-russian-msmarco")
+
+    RAG_PIPELINE_TYPE: str = os.getenv(
+        "RAG_PIPELINE_TYPE", "naive")  # naive / advanced
+
+    HYBRID_RETRIEVER_TOP_K: int = 20   # сколько кандидатов берём от гибридного поиска
+    FINAL_TOP_K: int = 5               # сколько остаётся после реранкинга
+
+    # Поиск в сети
+    WEB_SEARCH_PROVIDER: str = os.getenv("WEB_SEARCH_PROVIDER", "duckduckgo")
 
     class Config:
         env_file = ".env"

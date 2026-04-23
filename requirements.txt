@@ -25,3 +25,11 @@ pytorch
 pytorch-cuda
 einops
 requests
+accelerate
+bitsandbytes
+sentence-transformers
+openpyxl
+pacmap
+ragatouille
+duckduckgo-search 
+tavily-python       

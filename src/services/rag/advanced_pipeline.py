@@ -1,16 +1,21 @@
-from src.services.rag.retriever import Retriever
-from src.services.rag.generator import Generator
+# src/services/rag/advanced_pipeline.py
+from typing import List
 from src.services.llm.client import LLMClient
 from src.services.vector_store.faiss_store import FAISSVectorStore
-from src.core.models.chat import ChatResponse, ChatMessage
+from src.services.rag.hybrid_retriever import HybridRetriever
+from src.services.rag.reranker import Reranker
+from src.services.rag.generator import Generator
+from src.core.models.chat import ChatResponse, ChatMessage, SourceInfo
+from src.core.models.document import DocumentChunk
 from src.services.web_search.service import WebSearchService
-from typing import List
-from src.core.models.chat import SourceInfo
+from config.settings import settings
 
 
-class RAGPipeline:
-    def __init__(self, vector_store: FAISSVectorStore):
-        self.retriever = Retriever(vector_store)
+class AdvancedRAGPipeline:
+    def __init__(self, vector_store: FAISSVectorStore, chunks: List[DocumentChunk]):
+        self.retriever = HybridRetriever(vector_store, chunks)
+        # Возвращаем ре-ранкер с новой моделью
+        self.reranker = Reranker(model_name=settings.RERANKER_MODEL_NAME)
         self.generator = Generator(LLMClient())
         self.web_search = WebSearchService()
 
@@ -19,28 +24,33 @@ class RAGPipeline:
         if not user_message:
             return ChatResponse(answer="Пожалуйста, введите ваш вопрос.", sources=[])
 
-        sources = []
+        initial_sources = []
 
         # 1. Поиск в векторной базе (если включён)
         if use_vector_db:
-            sources = self.retriever.retrieve(user_message)
+            initial_sources = self.retriever.retrieve(user_message, top_k=20)
 
         # 2. Если результатов нет (или БД отключена), ищем в интернете
-        if not sources:
+        if not initial_sources:
             print("Выполняется поиск в интернете...")
             web_results = self.web_search.search(user_message)
             if web_results:
-                sources = []
+                initial_sources = []
                 for result in web_results:
-                    sources.append(SourceInfo(
+                    initial_sources.append(SourceInfo(
                         document_name=result.get(
                             'title', 'Неизвестный источник'),
                         chunk_text=result.get('snippet', ''),
                         relevance_score=1.0
                     ))
-                print(f"Найдено {len(sources)} результатов в интернете.")
 
-        # 3. Ограничение контекста и генерация (без изменений)
+        # 3. Ре-ранкинг (если активирован) и ограничение контекста
+        if self.reranker and initial_sources:
+            sources = self.reranker.rerank(
+                user_message, initial_sources, top_k=5)
+        else:
+            sources = initial_sources[:5]
+
         MAX_CONTEXT_CHARS = 2000
         context_chunks = []
         total_len = 0
