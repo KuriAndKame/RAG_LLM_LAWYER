@@ -20,8 +20,10 @@ _modular_pipeline = None
 def get_modular_pipeline():
     global _modular_pipeline
     if _modular_pipeline is None:
-        chunks = _load_all_chunks()
-        _modular_pipeline = ModularRAGPipeline(get_vector_store(), chunks)
+        print("[INFO] Инициализация ModularRAGPipeline...")
+        # Используем правильное имя функции: _load_all_chunks()
+        _modular_pipeline = ModularRAGPipeline(
+            get_vector_store(), _load_all_chunks())
     return _modular_pipeline
 
 

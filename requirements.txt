@@ -32,4 +32,7 @@ openpyxl
 pacmap
 ragatouille
 duckduckgo-search 
-tavily-python       
+tavily-python
+ragas
+langchain_openai
+razdel    

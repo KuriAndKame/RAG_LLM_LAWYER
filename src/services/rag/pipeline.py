@@ -1,3 +1,4 @@
+# src/services/rag/pipeline.py
 from src.services.rag.retriever import Retriever
 from src.services.rag.generator import Generator
 from src.services.llm.client import LLMClient
@@ -14,7 +15,8 @@ class RAGPipeline:
         self.generator = Generator(LLMClient())
         self.web_search = WebSearchService()
 
-    def query(self, user_message: str, history: List[ChatMessage] = None, use_vector_db: bool = True) -> ChatResponse:
+    def query(self, user_message: str, history: List[ChatMessage] = None,
+              use_vector_db: bool = True, use_web_search: bool = False) -> ChatResponse:
         user_message = user_message.strip()
         if not user_message:
             return ChatResponse(answer="Пожалуйста, введите ваш вопрос.", sources=[])
@@ -23,10 +25,10 @@ class RAGPipeline:
 
         # 1. Поиск в векторной базе (если включён)
         if use_vector_db:
-            sources = self.retriever.retrieve(user_message)
+            sources = self.retriever.retrieve(user_message, top_k=5)
 
-        # 2. Если результатов нет (или БД отключена), ищем в интернете
-        if not sources:
+        # 2. Если результатов нет и поиск разрешен, ищем в интернете
+        if use_web_search and not sources:
             print("Выполняется поиск в интернете...")
             web_results = self.web_search.search(user_message)
             if web_results:
@@ -40,15 +42,8 @@ class RAGPipeline:
                     ))
                 print(f"Найдено {len(sources)} результатов в интернете.")
 
-        # 3. Ограничение контекста и генерация (без изменений)
-        MAX_CONTEXT_CHARS = 2000
-        context_chunks = []
-        total_len = 0
-        for s in sources:
-            if total_len + len(s.chunk_text) > MAX_CONTEXT_CHARS:
-                break
-            context_chunks.append(s.chunk_text)
-            total_len += len(s.chunk_text)
+        # 3. Формирование контекста (передаем найденные 5 чанков целиком)
+        context_chunks = [s.chunk_text for s in sources]
 
         history_dicts = []
         if history:
