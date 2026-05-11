@@ -81,7 +81,10 @@ class ModularRAGPipeline:
             sources = sources[:5]
 
         # 7. Подготовка контекста (без обрезки)
-        context_chunks = [s.chunk_text for s in sources]
+        context_chunks = [
+            f"[Документ-источник: {s.document_name}]\nТекст: {s.chunk_text}"
+            for s in sources
+        ]
 
         history_dicts = [{"role": msg.role, "content": msg.content}
                          for msg in history_context] if history_context else []

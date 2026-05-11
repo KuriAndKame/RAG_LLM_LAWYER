@@ -1,0 +1,32 @@
+{
+  "naive": {
+    "metrics": {
+      "context_precision": 0.99999999998,
+      "context_recall": 1.0,
+      "answer_relevancy": 0.8220952392675754,
+      "faithfulness": 0.8801075268817204,
+      "answer_correctness": 0.5464860869107471
+    },
+    "num_samples": 33
+  },
+  "advanced": {
+    "metrics": {
+      "context_precision": 0.8041666666446775,
+      "context_recall": 0.8701298701298702,
+      "answer_relevancy": 0.543463829644077,
+      "faithfulness": 0.6691919191919191,
+      "answer_correctness": 0.4605405233057677
+    },
+    "num_samples": 33
+  },
+  "modular": {
+    "metrics": {
+      "context_precision": 0.8666666666421429,
+      "context_recall": 0.9322916666666666,
+      "answer_relevancy": 0.5330785500560011,
+      "faithfulness": 0.56328125,
+      "answer_correctness": 0.42805997692884085
+    },
+    "num_samples": 33
+  }
+}

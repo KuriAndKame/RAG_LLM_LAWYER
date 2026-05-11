@@ -56,7 +56,7 @@ def main():
                     "contexts": contexts,
                     "ground_truth": q.get("ground_truth", "")
                 })
-            time.sleep(1)
+            time.sleep(25)
         all_datasets[pipeline_type] = dataset
 
     # Сохраняем сгенерированные ответы
